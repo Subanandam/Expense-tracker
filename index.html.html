@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Expense Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .summary-card .amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .expenses-list {
+            margin-top: 30px;
+        }
+
+        .expense-item {
+            background: white;
+            border: 2px solid #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+
+        .expense-item:hover {
+            border-color: #667eea;
+        }
+
+        .expense-info {
+            flex: 1;
+        }
+
+        .expense-description {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .expense-meta {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .expense-category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .expense-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-right: 15px;
+        }
+
+        .income-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-right: 15px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .no-expenses {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .category-breakdown {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .category-breakdown h2 {
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .category-name {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .category-total {
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Daily Expense Tracker</h1>
+        
+        <div class="summary">
+            <div class="summary-card">
+                <h3>Total Income</h3>
+                <div class="amount" id="totalIncome">₹0</div>
+            </div>
+            <div class="summary-card">
+                <h3>Total Expenses</h3>
+                <div class="amount" id="totalExpenses">₹0</div>
+            </div>
+            <div class="summary-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <h3>Balance</h3>
+                <div class="amount" id="balance">₹0</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 style="margin-bottom: 20px; color: #333;">Add Income</h2>
+            <form id="incomeForm">
+                <div class="form-group">
+                    <label for="incomeDescription">Description</label>
+                    <input type="text" id="incomeDescription" placeholder="e.g., Salary, Freelance, Bonus" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="incomeAmount">Amount (₹)</label>
+                        <input type="number" id="incomeAmount" placeholder="0" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="incomeCategory">Category</label>
+                        <select id="incomeCategory" required>
+                            <option value="">Select category</option>
+                            <option value="Salary">💼 Salary</option>
+                            <option value="Freelance">💻 Freelance</option>
+                            <option value="Business">🏢 Business</option>
+                            <option value="Investment">📈 Investment</option>
+                            <option value="Gift">🎁 Gift</option>
+                            <option value="Other">📌 Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="incomeDate">Date</label>
+                    <input type="date" id="incomeDate" required>
+                </div>
+
+                <button type="submit" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">Add Income</button>
+            </form>
+        </div>
+
+        <div class="form-section">
+            <h2 style="margin-bottom: 20px; color: #333;">Add Expense</h2>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input type="text" id="description" placeholder="e.g., Groceries, Lunch, Transport" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" id="amount" placeholder="0" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" required>
+                            <option value="">Select category</option>
+                            <option value="Food">🍔 Food</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Bills">💡 Bills</option>
+                            <option value="Entertainment">🎬 Entertainment</option>
+                            <option value="Health">⚕️ Health</option>
+                            <option value="Other">📌 Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+
+        <div class="category-breakdown" id="categoryBreakdown" style="display: none;">
+            <h2>Category Breakdown</h2>
+            <div id="categoryList"></div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="exportToExcel()" style="background: linear-gradient(135deg, #06beb6 0%, #48b1bf 100%); width: auto; padding: 14px 40px;">
+                📊 Export to Excel
+            </button>
+        </div>
+
+        <div class="expenses-list">
+            <h2 style="margin-bottom: 20px; color: #333;">Recent Income</h2>
+            <div id="incomeList">
+                <div class="no-expenses">No income added yet.</div>
+            </div>
+        </div>
+
+        <div class="expenses-list">
+            <h2 style="margin-bottom: 20px; color: #333;">Recent Expenses</h2>
+            <div id="expensesList">
+                <div class="no-expenses">No expenses yet. Add your first expense above!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('incomeDate').valueAsDate = new Date();
+
+        let expenses = [];
+        let income = [];
+
+        // Load data from storage on page load
+        async function loadData() {
+            try {
+                const expResult = await window.storage.get('expenses');
+                if (expResult && expResult.value) {
+                    expenses = JSON.parse(expResult.value);
+                }
+            } catch (error) {
+                console.log('No existing expenses found');
+            }
+
+            try {
+                const incResult = await window.storage.get('income');
+                if (incResult && incResult.value) {
+                    income = JSON.parse(incResult.value);
+                }
+            } catch (error) {
+                console.log('No existing income found');
+            }
+
+            renderExpenses();
+            renderIncome();
+            updateSummary();
+        }
+
+        // Save expenses to storage
+        async function saveExpenses() {
+            try {
+                await window.storage.set('expenses', JSON.stringify(expenses));
+            } catch (error) {
+                console.error('Error saving expenses:', error);
+            }
+        }
+
+        // Save income to storage
+        async function saveIncome() {
+            try {
+                await window.storage.set('income', JSON.stringify(income));
+            } catch (error) {
+                console.error('Error saving income:', error);
+            }
+        }
+
+        // Income form handler
+        document.getElementById('incomeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const incomeEntry = {
+                id: Date.now(),
+                description: document.getElementById('incomeDescription').value,
+                amount: parseFloat(document.getElementById('incomeAmount').value),
+                category: document.getElementById('incomeCategory').value,
+                date: document.getElementById('incomeDate').value
+            };
+
+            income.unshift(incomeEntry);
+            await saveIncome();
+            renderIncome();
+            updateSummary();
+            
+            this.reset();
+            document.getElementById('incomeDate').valueAsDate = new Date();
+        });
+
+        // Expense form handler
+        document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const expense = {
+                id: Date.now(),
+                description: document.getElementById('description').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                date: document.getElementById('date').value
+            };
+
+            expenses.unshift(expense);
+            await saveExpenses();
+            renderExpenses();
+            updateSummary();
+            
+            this.reset();
+            document.getElementById('date').valueAsDate = new Date();
+        });
+
+        async function deleteExpense(id) {
+            expenses = expenses.filter(exp => exp.id !== id);
+            await saveExpenses();
+            renderExpenses();
+            updateSummary();
+        }
+
+        async function deleteIncome(id) {
+            income = income.filter(inc => inc.id !== id);
+            await saveIncome();
+            renderIncome();
+            updateSummary();
+        }
+
+        function renderIncome() {
+            const list = document.getElementById('incomeList');
+            
+            if (income.length === 0) {
+                list.innerHTML = '<div class="no-expenses">No income added yet.</div>';
+                return;
+            }
+
+            list.innerHTML = income.map(inc => `
+                <div class="expense-item">
+                    <div class="expense-info">
+                        <div class="expense-description">${inc.description}</div>
+                        <div class="expense-meta">
+                            <span class="expense-category" style="background: #27ae60;">${inc.category}</span>
+                            <span>${new Date(inc.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                    </div>
+                    <div class="income-amount">₹${inc.amount.toFixed(2)}</div>
+                    <button class="delete-btn" onclick="deleteIncome(${inc.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expensesList');
+            
+            if (expenses.length === 0) {
+                list.innerHTML = '<div class="no-expenses">No expenses yet. Add your first expense above!</div>';
+                return;
+            }
+
+            list.innerHTML = expenses.map(expense => `
+                <div class="expense-item">
+                    <div class="expense-info">
+                        <div class="expense-description">${expense.description}</div>
+                        <div class="expense-meta">
+                            <span class="expense-category">${expense.category}</span>
+                            <span>${new Date(expense.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                    </div>
+                    <div class="expense-amount">₹${expense.amount.toFixed(2)}</div>
+                    <button class="delete-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function updateSummary() {
+            const totalIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const balance = totalIncome - totalExpenses;
+
+            document.getElementById('totalIncome').textContent = `₹${totalIncome.toFixed(2)}`;
+            document.getElementById('totalExpenses').textContent = `₹${totalExpenses.toFixed(2)}`;
+            document.getElementById('balance').textContent = `₹${balance.toFixed(2)}`;
+
+            updateCategoryBreakdown();
+        }
+
+        function updateCategoryBreakdown() {
+            const categoryTotals = {};
+            expenses.forEach(exp => {
+                categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+            });
+
+            const categoryList = document.getElementById('categoryList');
+            const categoryBreakdown = document.getElementById('categoryBreakdown');
+
+            if (Object.keys(categoryTotals).length === 0) {
+                categoryBreakdown.style.display = 'none';
+                return;
+            }
+
+            categoryBreakdown.style.display = 'block';
+            categoryList.innerHTML = Object.entries(categoryTotals)
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, total]) => `
+                    <div class="category-item">
+                        <span class="category-name">${category}</span>
+                        <span class="category-total">₹${total.toFixed(2)}</span>
+                    </div>
+                `).join('');
+        }
+
+        function exportToExcel() {
+            // Create CSV content
+            let csv = 'Type,Date,Description,Category,Amount\n';
+            
+            // Add income entries
+            income.forEach(inc => {
+                csv += `Income,${inc.date},"${inc.description}",${inc.category},${inc.amount}\n`;
+            });
+            
+            // Add expense entries
+            expenses.forEach(exp => {
+                csv += `Expense,${exp.date},"${exp.description}",${exp.category},${exp.amount}\n`;
+            });
+
+            // Add summary at the end
+            const totalIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            csv += '\n';
+            csv += `Summary,,,,\n`;
+            csv += `Total Income,,,₹,${totalIncome.toFixed(2)}\n`;
+            csv += `Total Expenses,,,₹,${totalExpenses.toFixed(2)}\n`;
+            csv += `Balance,,,₹,${(totalIncome - totalExpenses).toFixed(2)}\n`;
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `expense_report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html>
